@@ -82,7 +82,7 @@ void loop() {
     // imprimir pontos e energia
     drawPanel(PANEL_POSITION);
 
-    // avaliar se o joystick esta direcionado para algum lugar e desenhar nave
+    // avalidar se o joystick esta direcionado para algum lugar e desenhar nave
     availableShip();  
     
     // avaliar se deve gerar um tiro
@@ -154,7 +154,7 @@ void availableShipAndPowerCollision() {
   bool checkCollision = (pxShip == pxPower) && (pyShip == pyPower);
   bool alternativeCheckCollision = (pxShip == pxPower+1) && (pyShip == pyPower);
 
-  // houve uma colisao, remover energia
+  // houve uma colisao, remover asteroid e nave e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {
     energy+=10;
     if(energy > MAX_ENERGY) energy = 100;
@@ -174,7 +174,7 @@ void availablePower() {
       pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
       pyPower = random(0, 2);
       if(pxPower == pxAsteroid && pyPower == pyAsteroid) {
-        pxPower++;
+        pxPower = -1;
       }
     }
   } else {
@@ -217,12 +217,13 @@ void availableShootAndPowerCollision() {
   // houve uma colisao, remover asteroid e energia e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {
     playExplosionSound();
-    hasShoot = hasPower = false;
-    pxShoot = -1;
+    hasShoot = false;
+    hasPower = false;
     drawSomething(pxPower, pyPower, EXPLOSION);
     delay(200);
     pyPower = random(0, 2);
     pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
+    pxShoot = -1;
     score-=2;
   }
   
@@ -238,12 +239,12 @@ void availableShootAndAsteroidCollision() {
   if(checkCollision || alternativeCheckCollision) {
     playExplosionSound();
     hasShoot = false;
-    pxShoot = -1;
     drawSomething(pxAsteroid, pyAsteroid, EXPLOSION);
     delay(200);
     pyAsteroid = random(0, 2);
     pxAsteroid = MAX_INITIAL_OBJECTS_POSITION_X;
-
+    pxShoot = -1;
+    
     if(asteroidGenerated == 1 || asteroidGenerated == 2) {
       score += 2;
     } else if(asteroidGenerated == 3 || asteroidGenerated == 4) {
@@ -259,8 +260,9 @@ void availableAsteroid() {
   
   // diminuir a posicao de um asteroid
   pxAsteroid--;
+  
   if(pxPower == pxAsteroid && pyPower == pyAsteroid) {
-    pxAsteroid++;
+    pxAsteroid = -1;
   }
   // desenhar asteroid
   if(asteroidGenerated == 0) {
@@ -273,14 +275,20 @@ void availableAsteroid() {
     pyAsteroid = random(0, 2);
     asteroidGenerated = 0;
   }
+  
+  
 }
 
 // avaliar se deve gerar um tiro e gera caso positivo
 void availableShoot() {
-  if(digitalRead(START_BUTTON) == 0 && energy < MAX_ENERGY) { // se botao de tiro for pressionado, emitir um projetil
-    pxShoot = 1;
-    pyShoot = pyShip;
-    hasShoot = playSound = true;
+
+  if(!hasShoot) {
+    if(digitalRead(START_BUTTON) == 0) { // se botao de tiro for pressionado, emitir um projetil
+      pxShoot = 1;
+      pyShoot = pyShip;
+      hasShoot = true;
+      playSound = true;
+    }
   }
   // se um tiro foi disparado
   if(hasShoot) {
@@ -299,7 +307,7 @@ void availableShoot() {
   }
 }
 
-// avaliar se o joystick esta direcionado para algum lugar e desenhar nave
+// avalidar se o joystick esta direcionado para algum lugar e desenhar nave
 void availableShip() {
   
   // lendo a posicao do joystick
