@@ -82,7 +82,7 @@ void loop() {
     // imprimir pontos e energia
     drawPanel(PANEL_POSITION);
 
-    // avalidar se o joystick esta direcionado para algum lugar e desenhar nave
+    // avaliar se o joystick esta direcionado para algum lugar e desenhar nave
     availableShip();  
     
     // avaliar se deve gerar um tiro
@@ -299,7 +299,7 @@ void availableShoot() {
   }
 }
 
-// avalidar se o joystick esta direcionado para algum lugar e desenhar nave
+// avaliar se o joystick esta direcionado para algum lugar e desenhar nave
 void availableShip() {
   
   // lendo a posicao do joystick
