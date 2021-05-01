@@ -131,7 +131,7 @@ void loop() {
 
 // avaliar se energia acabou
 void availablePowerShip() {
-  finishGame(score >= SCORE_TO_WIN, NO_ENERGY);
+  finishGame(energy < 0, NO_ENERGY);
 }
 
 // avaliar se jogador atingiu pontuacao maxima para vitoria
