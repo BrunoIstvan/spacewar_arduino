@@ -154,7 +154,7 @@ void availableShipAndPowerCollision() {
   bool checkCollision = (pxShip == pxPower) && (pyShip == pyPower);
   bool alternativeCheckCollision = (pxShip == pxPower+1) && (pyShip == pyPower);
 
-  // houve uma colisao, remover asteroid e nave e desenhar explosao
+  // houve uma colisao, remover energia
   if(checkCollision || alternativeCheckCollision) {
     energy+=10;
     if(energy > MAX_ENERGY) energy = 100;
