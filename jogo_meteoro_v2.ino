@@ -15,6 +15,8 @@
 #define ENERGY_POSSIBILITY 30
 
 #define MAX_ENERGY 100
+#define ENERGY_INCREASE 10
+#define ENERGY_DECREASE 0.25
 #define SCORE_TO_WIN 100
 #define MIN_SCORE 0
 
@@ -112,7 +114,7 @@ void loop() {
     // avaliar se houve colisao entre tiro e energia
     availableShootAndPowerCollision();
     
-    energy -= 0.25;
+    energy -= ENERGY_DECREASE;
     
     delay(VELOCITY);
     
@@ -121,7 +123,7 @@ void loop() {
     drawMessageStoppedGame(INITIAL);
     
     // se jogador apertou botao, entao iniciar o jogo
-    if(digitalRead(START_BUTTON) == 0) {
+    if(digitalRead(START_BUTTON) == LOW) {
       resetGame();
     }
 
@@ -156,10 +158,11 @@ void availableShipAndPowerCollision() {
 
   // houve uma colisao, remover asteroid e nave e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {
-    energy+=10;
+    energy += ENERGY_INCREASE;
+    
     Serial.println("Incrementou energia");
     if(energy > MAX_ENERGY) { 
-      energy = 100;
+      energy = MAX_ENERGY;
       Serial.println("Resetou energia");
     }
     
@@ -167,23 +170,31 @@ void availableShipAndPowerCollision() {
     pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
     playTakePower();
   }
+  
 }
 
 // avaliar se vai gerar uma energia
 void availablePower() {
 
   if(!hasPower) {
+    
     // se for 5... gerar uma energia
     if(random(0, ENERGY_POSSIBILITY) == 5) {
+      
       hasPower = true;
       pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
       pyPower = random(0, 2);
+      
       if(pxPower == pxAsteroid || (pxPower == pxAsteroid + 1) || (pxPower + 1 == pxAsteroid) && pyPower == pyAsteroid) {
         pxPower = -10;
       }
+      
     }
+    
   } else {
+    
     pxPower--;
+    
     // se energia atingiu limite da tela
     if(pxPower < 0) {
       hasPower = false;
@@ -191,6 +202,7 @@ void availablePower() {
     } else {
        drawSomething(pxPower, pyPower, POWER);
     }
+    
   }
   
 }
@@ -203,12 +215,14 @@ void availableShipAndAsteroidCollision() {
 
   // houve uma colisao, remover asteroid e nave e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {    
+    
     game = false;
     drawSomething(pxShip, pyShip, EXPLOSION);
     playExplosionSound();
     drawMessageStoppedGame(LOSE);
     delay(5000);
     lcd.clear();
+    
   }
   
 }
@@ -221,6 +235,7 @@ void availableShootAndPowerCollision() {
 
   // houve uma colisao, remover asteroid e energia e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {
+    
     playExplosionSound();
     hasShoot = false;
     hasPower = false;
@@ -229,7 +244,8 @@ void availableShootAndPowerCollision() {
     pyPower = random(0, 2);
     pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
     pxShoot = -1;
-    score-=2;
+    score -= 2;
+    
   }
   
 }
@@ -242,6 +258,7 @@ void availableShootAndAsteroidCollision() {
 
   // houve uma colisao, remover asteroid e tiro e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {
+    
     playExplosionSound();
     hasShoot = false;
     drawSomething(pxAsteroid, pyAsteroid, EXPLOSION);
@@ -250,14 +267,16 @@ void availableShootAndAsteroidCollision() {
     pxAsteroid = MAX_INITIAL_OBJECTS_POSITION_X;
     pxShoot = -1;
     
-    if(asteroidGenerated == 1 || asteroidGenerated == 2) {
-      score += 2;
-    } else if(asteroidGenerated == 3 || asteroidGenerated == 4) {
-      score += 4;
-    }
+    //if(asteroidGenerated == 1 || asteroidGenerated == 2) {
+    score += 2;
+    //} else if(asteroidGenerated == 3 || asteroidGenerated == 4) {
+    //  score += 4;
+    //}
 
     asteroidGenerated = 0;
+    
   }
+  
 }
 
 // verificar se asteroid chegou no limite da tela e desenhar em caso negativo
@@ -295,6 +314,7 @@ void availableShoot() {
       playSound = true;
     }
   }
+  
   // se um tiro foi disparado
   if(hasShoot) {
     // desenhar tiro
@@ -305,11 +325,13 @@ void availableShoot() {
     }
     pxShoot++;
   }
+  
   // avaliar a posicao do tiro
   if(hasShoot && pxShoot > MAX_INITIAL_OBJECTS_POSITION_X) {
     pxShoot = 0;
     hasShoot = false;
   }
+  
 }
 
 // avalidar se o joystick esta direcionado para algum lugar e desenhar nave
@@ -330,29 +352,37 @@ void availableShip() {
 }
 
 void resetGame() {
+  
   score = MIN_SCORE;
   energy = MAX_ENERGY;
   Serial.println("Reset game");
   game = true;
+  
 }
 
 void drawExplosionShip(int px, int py) {
+  
   lcd.clear();
   drawSomething(px, py, EXPLOSION);
   delay(1000);
   lcd.clear();
+  
 }
 
 void drawSomething(int px, int py, int character) {
+  
   lcd.setCursor(px, py);
   lcd.write(character);
+  
 }
 
 void drawPanel(int px) {
+  
   lcd.setCursor(px, 0);
   lcd.print(score);
   lcd.setCursor(px, 1);
   lcd.print(energy);
+  
 }
 
 // desenhar a tela conforme status passado no parametro
@@ -384,17 +414,21 @@ void drawMessageStoppedGame(STATUS pStatus) {
 }
 
 void playShootSound() {
+  
   for(freqIn = 200; freqIn < 300; freqIn = freqIn + 2){
     piezoTone(1000000/freqIn,3);
   }
+  
 }
 
 void playExplosionSound() {
+  
   for(int k = 0; k < 250; k++){
     blow1 = random(500,1000);
     blow2 = random(1,3);
     piezoTone(blow1,blow2);
   } 
+  
 }
 
 void playTakePower() {
@@ -409,7 +443,8 @@ void playTakePower() {
   
 }
 
-void piezoTone(long freq, long duration){
+void piezoTone(long freq, long duration) {
+  
   long aSecond = 1000000;
   long period = aSecond/freq;
   duration = duration*1000;
@@ -420,6 +455,7 @@ void piezoTone(long freq, long duration){
     digitalWrite(PIEZO, LOW);
     delayMicroseconds(period/2);
   }
+  
 } 
 
 // Cria os personagens na memoria do display
