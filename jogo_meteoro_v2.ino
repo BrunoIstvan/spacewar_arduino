@@ -31,7 +31,7 @@
 const byte asteroidForm1[8] = {B00100,B01110,B10111,B11011,B11110,B01011,B11110,B00100};
 const byte asteroidForm2[8] = {B00000,B01110,B10111,B11111,B11011,B10101,B01110,B00000};
 const byte asteroidForm3[8] = {B01110,B10011,B01010,B11110,B11110,B01010,B10011,B01110};
-const byte asteroidForm4[8] = {B11001,B10110,B00100,B11100,B11100,B00100,B10110,B11001};
+const byte asteroidForm4[8] = {B01001,B10110,B00100,B11100,B11100,B00100,B10110,B01001};
 // const byte asteroidForm5[8] = {B10001,B01010,B10100,B10100,B10100,B10100,B01010,B10001};
 
 const byte shipForm[8]      = { B11000, B01000, B01100, B11011, B11011, B01100, B01000, B11000 };
@@ -151,13 +151,18 @@ void finishGame(bool validation, int character) {
 // avaliar se houve colisao entre nave e energia
 void availableShipAndPowerCollision() {
   
-  bool checkCollision = (pxShip == pxPower) && (pyShip == pyPower);
-  bool alternativeCheckCollision = (pxShip == pxPower+1) && (pyShip == pyPower);
+  bool checkCollision = (pxShip == pxPower) && (pyShip == pyPower) && hasPower;
+  bool alternativeCheckCollision = (pxShip == pxPower+1) && (pyShip == pyPower) && hasPower;
 
   // houve uma colisao, remover asteroid e nave e desenhar explosao
   if(checkCollision || alternativeCheckCollision) {
     energy+=10;
-    if(energy > MAX_ENERGY) energy = 100;
+    Serial.println("Incrementou energia");
+    if(energy > MAX_ENERGY) { 
+      energy = 100;
+      Serial.println("Resetou energia");
+    }
+    
     hasPower = false;
     pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
     playTakePower();
@@ -173,8 +178,8 @@ void availablePower() {
       hasPower = true;
       pxPower = MAX_INITIAL_OBJECTS_POSITION_X;
       pyPower = random(0, 2);
-      if(pxPower == pxAsteroid && pyPower == pyAsteroid) {
-        pxPower = -1;
+      if(pxPower == pxAsteroid || (pxPower == pxAsteroid + 1) || (pxPower + 1 == pxAsteroid) && pyPower == pyAsteroid) {
+        pxPower = -10;
       }
     }
   } else {
@@ -261,8 +266,8 @@ void availableAsteroid() {
   // diminuir a posicao de um asteroid
   pxAsteroid--;
   
-  if(pxPower == pxAsteroid && pyPower == pyAsteroid) {
-    pxAsteroid = -1;
+  if(pxPower == pxAsteroid || (pxPower == pxAsteroid + 1) || (pxPower + 1 == pxAsteroid) && pyPower == pyAsteroid) {
+    pxPower = -10;
   }
   // desenhar asteroid
   if(asteroidGenerated == 0) {
@@ -327,6 +332,7 @@ void availableShip() {
 void resetGame() {
   score = MIN_SCORE;
   energy = MAX_ENERGY;
+  Serial.println("Reset game");
   game = true;
 }
 
